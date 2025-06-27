@@ -2,17 +2,37 @@ import axios from 'axios';
 
     class ZendeskClient {
       constructor() {
-        this.subdomain = process.env.ZENDESK_SUBDOMAIN;
+        this.baseUrl = process.env.ZENDESK_BASE_URL;
         this.email = process.env.ZENDESK_EMAIL;
         this.apiToken = process.env.ZENDESK_API_TOKEN;
+        this.subdomain = process.env.ZENDESK_SUBDOMAIN;
+        
+        // Extract subdomain from base URL if not explicitly provided
+        if (!this.subdomain && this.baseUrl) {
+          try {
+            const url = new URL(this.baseUrl);
+            const hostname = url.hostname;
+            this.subdomain = hostname.split('.')[0];
+          } catch (error) {
+            console.error(`Failed to extract subdomain from base URL: ${error.message}`);
+          }
+        }
         
         if (!this.subdomain || !this.email || !this.apiToken) {
-          console.warn('Zendesk credentials not found in environment variables. Please set ZENDESK_SUBDOMAIN, ZENDESK_EMAIL, and ZENDESK_API_TOKEN.');
+          console.warn('Zendesk credentials not found in environment variables. Please set ZENDESK_SUBDOMAIN (or ZENDESK_BASE_URL), ZENDESK_EMAIL, and ZENDESK_API_TOKEN.');
         }
       }
 
       getBaseUrl() {
-        return `https://${this.subdomain}.zendesk.com/api/v2`;
+        if (this.baseUrl) {
+          // If we have a full base URL, just append the API path
+          return `${this.baseUrl}/api/v2`;
+        } else if (this.subdomain) {
+          // Otherwise construct from subdomain
+          return `https://${this.subdomain}.zendesk.com/api/v2`;
+        } else {
+          throw new Error('subdomain is required when accessing the Zendesk API!');
+        }
       }
 
       getAuthHeader() {
@@ -42,9 +62,14 @@ import axios from 'axios';
 
           return response.data;
         } catch (error) {
+          console.error(`Request error: ${error.message}`);
+          
           if (error.response) {
+            console.error(`Response status: ${error.response.status}`);
+            console.error(`Response data: ${JSON.stringify(error.response.data)}`);
             throw new Error(`Zendesk API Error: ${error.response.status} - ${JSON.stringify(error.response.data)}`);
           }
+          
           throw error;
         }
       }
@@ -219,7 +244,13 @@ import axios from 'axios';
 
       // Search
       async search(query, params = {}) {
-        return this.request('GET', '/search.json', null, { query, ...params });
+        try {
+          const requestParams = { query, ...params };
+          return await this.request('GET', '/search.json', null, requestParams);
+        } catch (error) {
+          console.error(`Search error: ${error.message}`);
+          throw error;
+        }
       }
 
       // Help Center
