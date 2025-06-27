@@ -2,6 +2,8 @@
 
     A comprehensive Model Context Protocol (MCP) server for interacting with the Zendesk API. This server provides tools and resources for managing Zendesk Support, Talk, Chat, and Guide products.
 
+    **Note:** This is an enhanced version of the original [zendesk-mcp-server](https://github.com/mattcoatsworth/zendesk-mcp-server) with significant improvements including advanced search capabilities, additional tools, and enhanced functionality.
+
     ## Features
 
     - Complete coverage of Zendesk API functionality
@@ -47,6 +49,15 @@
     Test the server using the MCP Inspector:
     ```
     npm run inspect
+    ```
+
+    ### Development Testing
+
+    Various test scripts are available for development and debugging:
+    ```
+    node test-tickets.js        # Test ticket functionality
+    node test-search.js         # Test search functionality
+    node test-mcp.js           # Test MCP protocol
     ```
 
     ## Available Tools
@@ -107,8 +118,10 @@
     - `update_automation`: Update an existing automation
     - `delete_automation`: Delete an automation
 
-    ### Search
-    - `search`: Search across Zendesk data
+    ### Search (Enhanced)
+    - `search`: Search across all Zendesk data types using advanced query syntax
+    - `search_tickets`: Dedicated ticket search with automatic type filtering
+    - `search_tickets_by_filter`: Simplified ticket search using common filter parameters
 
     ### Help Center
     - `list_articles`: List Help Center articles
@@ -126,6 +139,25 @@
     ## Available Resources
 
     - `zendesk://docs/{section}`: Access documentation for different sections of the Zendesk API
+
+    ## Search Query Syntax
+
+    The enhanced search tools support Zendesk's powerful search syntax:
+
+    - `type:ticket status:open` - Find open tickets
+    - `priority:high created>2025-01-01` - High priority tickets created after Jan 1, 2025
+    - `subject:"500 error"` - Tickets with "500 error" in subject
+    - `tags:webhook description:configuration` - Tickets tagged "webhook" with "configuration" in description
+    - `status:pending updated<2025-06-01` - Pending tickets updated before June 1, 2025
+
+    ## Enhancements
+
+    This version includes several enhancements over the original:
+
+    - **Advanced Search**: Three different search tools for various use cases
+    - **Enhanced Error Handling**: Better error messages and debugging
+    - **Improved Documentation**: Comprehensive inline documentation
+    - **Development Tools**: Additional test scripts for development
 
     ## License
 
