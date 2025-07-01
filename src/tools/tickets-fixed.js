@@ -59,6 +59,7 @@ async function listTickets(args) {
     };
   }
 }
+
 async function getTicket(args) {
   try {
     const result = await zendeskClient.getTicket(args.id);
@@ -75,6 +76,7 @@ async function getTicket(args) {
     };
   }
 }
+
 async function createTicket(args) {
   try {
     const ticketData = {
@@ -103,6 +105,7 @@ async function createTicket(args) {
     };
   }
 }
+
 async function updateTicket(args) {
   try {
     const ticketData = {};
@@ -130,6 +133,7 @@ async function updateTicket(args) {
     };
   }
 }
+
 async function deleteTicket(args) {
   try {
     await zendeskClient.deleteTicket(args.id);

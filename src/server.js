@@ -1,8 +1,8 @@
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { zendeskClient } from './zendesk-client.js';
 import { logger } from './debug-logger.js';
-import { ticketsTools } from './tools/tickets.js';
-import { usersTools } from './tools/users.js';
+import ticketsTools from './tools/tickets.js';
+import usersTools from './tools/users.js';
 import { organizationsTools } from './tools/organizations.js';
 import { groupsTools } from './tools/groups.js';
 import { macrosTools } from './tools/macros.js';
@@ -25,49 +25,20 @@ const server = new McpServer({
 
 // We'll add request logging at the transport level instead
 
-// Register all tools
-const allTools = [
-  ...ticketsTools,
-  ...usersTools,
-  ...organizationsTools,
-  ...groupsTools,
-  ...macrosTools,
-  ...viewsTools,
-  ...triggersTools,
-  ...automationsTools,
-  ...searchTools,
-  ...helpCenterTools,
-  ...supportTools,
-  ...talkTools,
-  ...chatTools
-];
+// Register tools using the new format
+logger.debug('Registering Zendesk tools...');
 
-// Register each tool with the server using zendesk___ prefix for Linux compatibility
-logger.debug(`Registering ${allTools.length} tools`);
-allTools.forEach((tool, index) => {
-  const toolName = `zendesk___${tool.name}`;
-  logger.debug(`Registering tool ${index + 1}/${allTools.length}: ${toolName}`);
-  server.tool(
-    toolName,
-    tool.schema,
-    async (args) => {
-      const startTime = Date.now();
-      logger.debug(`Executing tool: ${toolName}`, args);
-      try {
-        const result = await tool.handler(args);
-        const duration = Date.now() - startTime;
-        logger.debug(`Tool ${toolName} completed in ${duration}ms`);
-        return result;
-      } catch (error) {
-        const duration = Date.now() - startTime;
-        logger.error(`Tool ${toolName} failed after ${duration}ms`, error);
-        throw error;
-      }
-    },
-    { description: tool.description }
-  );
-});
-logger.info(`Successfully registered ${allTools.length} tools with zendesk___ prefix`);
+ticketsTools.registerTools(server);
+logger.debug('Registered Tickets tools');
+
+usersTools.registerTools(server);
+logger.debug('Registered Users tools');
+
+// TODO: Convert other tool modules to new format
+// organizationsTools.registerTools(server);
+// etc.
+
+logger.info('All tools registered successfully');
 
 // Add a resource for Zendesk API documentation
 server.resource(

@@ -95,10 +95,9 @@ export class StdioDebugWrapper {
           
           // Log any tools with potentially problematic names
           const problematicTools = result.tools.filter(tool => 
-            tool.name.includes('_') || 
-            tool.name.includes('-') || 
             tool.name.length > 50 ||
-            !/^[a-zA-Z][a-zA-Z0-9_]*$/.test(tool.name)
+            !/^[a-zA-Z][a-zA-Z0-9_]*$/.test(tool.name) ||
+            !tool.name.includes('___')
           );
           if (problematicTools.length > 0) {
             logger.warn('Tools with potentially problematic names', problematicTools.map(t => t.name));
