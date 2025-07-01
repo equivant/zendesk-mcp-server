@@ -5,15 +5,15 @@ import ticketsTools from './tools/tickets.js';
 import usersTools from './tools/users.js';
 import organizationsTools from './tools/organizations.js';
 import groupsTools from './tools/groups.js';
-import { macrosTools } from './tools/macros.js';
-import { viewsTools } from './tools/views.js';
-import { triggersTools } from './tools/triggers.js';
-import { automationsTools } from './tools/automations.js';
+import macrosTools from './tools/macros.js';
+import viewsTools from './tools/views.js';
+import triggersTools from './tools/triggers.js';
+import automationsTools from './tools/automations.js';
 import searchTools from './tools/search.js';
-import { helpCenterTools } from './tools/help-center.js';
-import { supportTools } from './tools/support.js';
-import { talkTools } from './tools/talk.js';
-import { chatTools } from './tools/chat.js';
+import helpCenterTools from './tools/help-center.js';
+import supportTools from './tools/support.js';
+import talkTools from './tools/talk.js';
+import chatTools from './tools/chat.js';
 
 // Create an MCP server for Zendesk API
 logger.debug('Creating MCP server instance');
@@ -43,9 +43,29 @@ logger.debug('Registered Search tools');
 groupsTools.registerTools(server);
 logger.debug('Registered Groups tools');
 
-// TODO: Convert other tool modules to new format
-// macrosTools.registerTools(server);
-// etc.
+macrosTools.registerTools(server);
+logger.debug('Registered Macros tools');
+
+viewsTools.registerTools(server);
+logger.debug('Registered Views tools');
+
+triggersTools.registerTools(server);
+logger.debug('Registered Triggers tools');
+
+automationsTools.registerTools(server);
+logger.debug('Registered Automations tools');
+
+helpCenterTools.registerTools(server);
+logger.debug('Registered Help Center tools');
+
+supportTools.registerTools(server);
+logger.debug('Registered Support tools');
+
+talkTools.registerTools(server);
+logger.debug('Registered Talk tools');
+
+chatTools.registerTools(server);
+logger.debug('Registered Chat tools');
 
 logger.info('All tools registered successfully');
 
