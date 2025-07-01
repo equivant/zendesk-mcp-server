@@ -1,147 +1,177 @@
 import { z } from 'zod';
-    import { zendeskClient } from '../zendesk-client.js';
+import { zendeskClient } from '../zendesk-client.js';
 
-    export const organizationsTools = [
-      {
-        name: "list_organizations",
-        description: "List organizations in Zendesk",
-        schema: {
-          page: z.number().optional().describe("Page number for pagination"),
-          per_page: z.number().optional().describe("Number of organizations per page (max 100)")
-        },
-        handler: async ({ page, per_page }) => {
-          try {
-            const params = { page, per_page };
-            const result = await zendeskClient.listOrganizations(params);
-            return {
-              content: [{ 
-                type: "text", 
-                text: JSON.stringify(result, null, 2)
-              }]
-            };
-          } catch (error) {
-            return {
-              content: [{ type: "text", text: `Error listing organizations: ${error.message}` }],
-              isError: true
-            };
-          }
-        }
-      },
-      {
-        name: "get_organization",
-        description: "Get a specific organization by ID",
-        schema: {
-          id: z.number().describe("Organization ID")
-        },
-        handler: async ({ id }) => {
-          try {
-            const result = await zendeskClient.getOrganization(id);
-            return {
-              content: [{ 
-                type: "text", 
-                text: JSON.stringify(result, null, 2)
-              }]
-            };
-          } catch (error) {
-            return {
-              content: [{ type: "text", text: `Error getting organization: ${error.message}` }],
-              isError: true
-            };
-          }
-        }
-      },
-      {
-        name: "create_organization",
-        description: "Create a new organization",
-        schema: {
-          name: z.string().describe("Organization name"),
-          domain_names: z.array(z.string()).optional().describe("Domain names for the organization"),
-          details: z.string().optional().describe("Details about the organization"),
-          notes: z.string().optional().describe("Notes about the organization"),
-          tags: z.array(z.string()).optional().describe("Tags for the organization")
-        },
-        handler: async ({ name, domain_names, details, notes, tags }) => {
-          try {
-            const orgData = {
-              name,
-              domain_names,
-              details,
-              notes,
-              tags
-            };
-            
-            const result = await zendeskClient.createOrganization(orgData);
-            return {
-              content: [{ 
-                type: "text", 
-                text: `Organization created successfully!\n\n${JSON.stringify(result, null, 2)}`
-              }]
-            };
-          } catch (error) {
-            return {
-              content: [{ type: "text", text: `Error creating organization: ${error.message}` }],
-              isError: true
-            };
-          }
-        }
-      },
-      {
-        name: "update_organization",
-        description: "Update an existing organization",
-        schema: {
-          id: z.number().describe("Organization ID to update"),
-          name: z.string().optional().describe("Updated organization name"),
-          domain_names: z.array(z.string()).optional().describe("Updated domain names"),
-          details: z.string().optional().describe("Updated details"),
-          notes: z.string().optional().describe("Updated notes"),
-          tags: z.array(z.string()).optional().describe("Updated tags")
-        },
-        handler: async ({ id, name, domain_names, details, notes, tags }) => {
-          try {
-            const orgData = {};
-            
-            if (name !== undefined) orgData.name = name;
-            if (domain_names !== undefined) orgData.domain_names = domain_names;
-            if (details !== undefined) orgData.details = details;
-            if (notes !== undefined) orgData.notes = notes;
-            if (tags !== undefined) orgData.tags = tags;
-            
-            const result = await zendeskClient.updateOrganization(id, orgData);
-            return {
-              content: [{ 
-                type: "text", 
-                text: `Organization updated successfully!\n\n${JSON.stringify(result, null, 2)}`
-              }]
-            };
-          } catch (error) {
-            return {
-              content: [{ type: "text", text: `Error updating organization: ${error.message}` }],
-              isError: true
-            };
-          }
-        }
-      },
-      {
-        name: "delete_organization",
-        description: "Delete an organization",
-        schema: {
-          id: z.number().describe("Organization ID to delete")
-        },
-        handler: async ({ id }) => {
-          try {
-            await zendeskClient.deleteOrganization(id);
-            return {
-              content: [{ 
-                type: "text", 
-                text: `Organization ${id} deleted successfully!`
-              }]
-            };
-          } catch (error) {
-            return {
-              content: [{ type: "text", text: `Error deleting organization: ${error.message}` }],
-              isError: true
-            };
-          }
-        }
-      }
-    ];
+// Define proper Zod schemas
+const ListOrganizationsSchema = z.object({
+  page: z.number().optional().describe("Page number for pagination"),
+  per_page: z.number().optional().describe("Number of organizations per page (max 100)")
+});
+
+const GetOrganizationSchema = z.object({
+  id: z.number().describe("Organization ID")
+});
+
+const CreateOrganizationSchema = z.object({
+  name: z.string().describe("Organization name"),
+  domain_names: z.array(z.string()).optional().describe("Domain names for the organization"),
+  details: z.string().optional().describe("Details about the organization"),
+  notes: z.string().optional().describe("Notes about the organization"),
+  tags: z.array(z.string()).optional().describe("Tags for the organization")
+});
+
+const UpdateOrganizationSchema = z.object({
+  id: z.number().describe("Organization ID to update"),
+  name: z.string().optional().describe("Updated organization name"),
+  domain_names: z.array(z.string()).optional().describe("Updated domain names"),
+  details: z.string().optional().describe("Updated details"),
+  notes: z.string().optional().describe("Updated notes"),
+  tags: z.array(z.string()).optional().describe("Updated tags")
+});
+
+const DeleteOrganizationSchema = z.object({
+  id: z.number().describe("Organization ID to delete")
+});
+
+// Tool handlers
+async function listOrganizations(args) {
+  try {
+    const params = { page: args.page, per_page: args.per_page };
+    const result = await zendeskClient.listOrganizations(params);
+    return {
+      content: [{ 
+        type: "text", 
+        text: JSON.stringify(result, null, 2)
+      }]
+    };
+  } catch (error) {
+    return {
+      content: [{ type: "text", text: `Error listing organizations: ${error.message}` }],
+      isError: true
+    };
+  }
+}
+
+async function getOrganization(args) {
+  try {
+    const result = await zendeskClient.getOrganization(args.id);
+    return {
+      content: [{ 
+        type: "text", 
+        text: JSON.stringify(result, null, 2)
+      }]
+    };
+  } catch (error) {
+    return {
+      content: [{ type: "text", text: `Error getting organization: ${error.message}` }],
+      isError: true
+    };
+  }
+}
+
+async function createOrganization(args) {
+  try {
+    const orgData = {
+      name: args.name,
+      domain_names: args.domain_names,
+      details: args.details,
+      notes: args.notes,
+      tags: args.tags
+    };
+    
+    const result = await zendeskClient.createOrganization(orgData);
+    return {
+      content: [{ 
+        type: "text", 
+        text: `Organization created successfully!\n\n${JSON.stringify(result, null, 2)}`
+      }]
+    };
+  } catch (error) {
+    return {
+      content: [{ type: "text", text: `Error creating organization: ${error.message}` }],
+      isError: true
+    };
+  }
+}
+
+async function updateOrganization(args) {
+  try {
+    const orgData = {};
+    
+    if (args.name !== undefined) orgData.name = args.name;
+    if (args.domain_names !== undefined) orgData.domain_names = args.domain_names;
+    if (args.details !== undefined) orgData.details = args.details;
+    if (args.notes !== undefined) orgData.notes = args.notes;
+    if (args.tags !== undefined) orgData.tags = args.tags;
+    
+    const result = await zendeskClient.updateOrganization(args.id, orgData);
+    return {
+      content: [{ 
+        type: "text", 
+        text: `Organization updated successfully!\n\n${JSON.stringify(result, null, 2)}`
+      }]
+    };
+  } catch (error) {
+    return {
+      content: [{ type: "text", text: `Error updating organization: ${error.message}` }],
+      isError: true
+    };
+  }
+}
+
+async function deleteOrganization(args) {
+  try {
+    await zendeskClient.deleteOrganization(args.id);
+    return {
+      content: [{ 
+        type: "text", 
+        text: `Organization ${args.id} deleted successfully!`
+      }]
+    };
+  } catch (error) {
+    return {
+      content: [{ type: "text", text: `Error deleting organization: ${error.message}` }],
+      isError: true
+    };
+  }
+}
+
+// Register tools function
+function registerTools(server) {
+  server.tool(
+    'list_organizations',
+    'List organizations in Zendesk',
+    ListOrganizationsSchema.shape,
+    listOrganizations
+  );
+
+  server.tool(
+    'get_organization',
+    'Get a specific organization by ID',
+    GetOrganizationSchema.shape,
+    getOrganization
+  );
+
+  server.tool(
+    'create_organization',
+    'Create a new organization',
+    CreateOrganizationSchema.shape,
+    createOrganization
+  );
+
+  server.tool(
+    'update_organization',
+    'Update an existing organization',
+    UpdateOrganizationSchema.shape,
+    updateOrganization
+  );
+
+  server.tool(
+    'delete_organization',
+    'Delete an organization',
+    DeleteOrganizationSchema.shape,
+    deleteOrganization
+  );
+}
+
+export default { registerTools };
+

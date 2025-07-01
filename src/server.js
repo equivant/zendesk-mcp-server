@@ -3,13 +3,13 @@ import { zendeskClient } from './zendesk-client.js';
 import { logger } from './debug-logger.js';
 import ticketsTools from './tools/tickets.js';
 import usersTools from './tools/users.js';
-import { organizationsTools } from './tools/organizations.js';
-import { groupsTools } from './tools/groups.js';
+import organizationsTools from './tools/organizations.js';
+import groupsTools from './tools/groups.js';
 import { macrosTools } from './tools/macros.js';
 import { viewsTools } from './tools/views.js';
 import { triggersTools } from './tools/triggers.js';
 import { automationsTools } from './tools/automations.js';
-import { searchTools } from './tools/search.js';
+import searchTools from './tools/search.js';
 import { helpCenterTools } from './tools/help-center.js';
 import { supportTools } from './tools/support.js';
 import { talkTools } from './tools/talk.js';
@@ -34,8 +34,17 @@ logger.debug('Registered Tickets tools');
 usersTools.registerTools(server);
 logger.debug('Registered Users tools');
 
+organizationsTools.registerTools(server);
+logger.debug('Registered Organizations tools');
+
+searchTools.registerTools(server);
+logger.debug('Registered Search tools');
+
+groupsTools.registerTools(server);
+logger.debug('Registered Groups tools');
+
 // TODO: Convert other tool modules to new format
-// organizationsTools.registerTools(server);
+// macrosTools.registerTools(server);
 // etc.
 
 logger.info('All tools registered successfully');
