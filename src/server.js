@@ -1,5 +1,6 @@
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { zendeskClient } from './zendesk-client.js';
+import { logger } from './debug-logger.js';
 import { ticketsTools } from './tools/tickets.js';
 import { usersTools } from './tools/users.js';
 import { organizationsTools } from './tools/organizations.js';
@@ -15,11 +16,14 @@ import { talkTools } from './tools/talk.js';
 import { chatTools } from './tools/chat.js';
 
 // Create an MCP server for Zendesk API
+logger.debug('Creating MCP server instance');
 const server = new McpServer({
   name: "Zendesk API",
   version: "1.0.0",
   description: "MCP Server for interacting with the Zendesk API"
 });
+
+// We'll add request logging at the transport level instead
 
 // Register all tools
 const allTools = [
@@ -39,14 +43,30 @@ const allTools = [
 ];
 
 // Register each tool with the server
-allTools.forEach(tool => {
+logger.debug(`Registering ${allTools.length} tools`);
+allTools.forEach((tool, index) => {
+  logger.debug(`Registering tool ${index + 1}/${allTools.length}: ${tool.name}`);
   server.tool(
     tool.name,
     tool.schema,
-    tool.handler,
+    async (args) => {
+      const startTime = Date.now();
+      logger.debug(`Executing tool: ${tool.name}`, args);
+      try {
+        const result = await tool.handler(args);
+        const duration = Date.now() - startTime;
+        logger.debug(`Tool ${tool.name} completed in ${duration}ms`);
+        return result;
+      } catch (error) {
+        const duration = Date.now() - startTime;
+        logger.error(`Tool ${tool.name} failed after ${duration}ms`, error);
+        throw error;
+      }
+    },
     { description: tool.description }
   );
 });
+logger.info(`Successfully registered ${allTools.length} tools`);
 
 // Add a resource for Zendesk API documentation
 server.resource(
@@ -97,7 +117,16 @@ server.resource(
   }
 );
 
-// Explicitly initialize tool handlers to ensure they're registered
-server.setToolRequestHandlers();
+// MCP protocol logging will be handled at the transport level
 
+// Explicitly initialize tool handlers to ensure they're registered
+logger.debug('Setting tool request handlers');
+try {
+  server.setToolRequestHandlers();
+  logger.debug('Tool request handlers set successfully');
+} catch (error) {
+  logger.error('Failed to set tool request handlers', error);
+}
+
+logger.debug('Server setup complete');
 export { server };

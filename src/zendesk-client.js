@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { logger } from './debug-logger.js';
 
     class ZendeskClient {
       constructor() {
@@ -41,6 +42,7 @@ import axios from 'axios';
       }
 
       async request(method, endpoint, data = null, params = null) {
+        const startTime = Date.now();
         try {
           if (!this.subdomain || !this.email || !this.apiToken) {
             throw new Error('Zendesk credentials not configured. Please set environment variables.');
@@ -52,6 +54,8 @@ import axios from 'axios';
             'Content-Type': 'application/json'
           };
 
+          logger.debug(`Zendesk API Request: ${method} ${endpoint}`, { params, data });
+
           const response = await axios({
             method,
             url,
@@ -60,13 +64,16 @@ import axios from 'axios';
             params
           });
 
+          const duration = Date.now() - startTime;
+          logger.debug(`Zendesk API Response: ${method} ${endpoint} (${response.status}) - ${duration}ms`);
+
           return response.data;
         } catch (error) {
-          console.error(`Request error: ${error.message}`);
+          const duration = Date.now() - startTime;
+          logger.error(`Zendesk API Error: ${method} ${endpoint} - ${duration}ms`, error.message);
           
           if (error.response) {
-            console.error(`Response status: ${error.response.status}`);
-            console.error(`Response data: ${JSON.stringify(error.response.data)}`);
+            logger.error(`Response status: ${error.response.status}`, error.response.data);
             throw new Error(`Zendesk API Error: ${error.response.status} - ${JSON.stringify(error.response.data)}`);
           }
           
