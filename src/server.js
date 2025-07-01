@@ -42,31 +42,32 @@ const allTools = [
   ...chatTools
 ];
 
-// Register each tool with the server
+// Register each tool with the server using zendesk___ prefix for Linux compatibility
 logger.debug(`Registering ${allTools.length} tools`);
 allTools.forEach((tool, index) => {
-  logger.debug(`Registering tool ${index + 1}/${allTools.length}: ${tool.name}`);
+  const toolName = `zendesk___${tool.name}`;
+  logger.debug(`Registering tool ${index + 1}/${allTools.length}: ${toolName}`);
   server.tool(
-    tool.name,
+    toolName,
     tool.schema,
     async (args) => {
       const startTime = Date.now();
-      logger.debug(`Executing tool: ${tool.name}`, args);
+      logger.debug(`Executing tool: ${toolName}`, args);
       try {
         const result = await tool.handler(args);
         const duration = Date.now() - startTime;
-        logger.debug(`Tool ${tool.name} completed in ${duration}ms`);
+        logger.debug(`Tool ${toolName} completed in ${duration}ms`);
         return result;
       } catch (error) {
         const duration = Date.now() - startTime;
-        logger.error(`Tool ${tool.name} failed after ${duration}ms`, error);
+        logger.error(`Tool ${toolName} failed after ${duration}ms`, error);
         throw error;
       }
     },
     { description: tool.description }
   );
 });
-logger.info(`Successfully registered ${allTools.length} tools`);
+logger.info(`Successfully registered ${allTools.length} tools with zendesk___ prefix`);
 
 // Add a resource for Zendesk API documentation
 server.resource(
