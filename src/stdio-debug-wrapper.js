@@ -89,6 +89,20 @@ export class StdioDebugWrapper {
         // Special handling for tools/list response
         if (result && result.tools) {
           logger.toolsListResponse(result.tools.length);
+          // Log all tool names for debugging
+          const toolNames = result.tools.map(tool => tool.name);
+          logger.debug('Tools being sent to Q CLI', toolNames);
+          
+          // Log any tools with potentially problematic names
+          const problematicTools = result.tools.filter(tool => 
+            tool.name.includes('_') || 
+            tool.name.includes('-') || 
+            tool.name.length > 50 ||
+            !/^[a-zA-Z][a-zA-Z0-9_]*$/.test(tool.name)
+          );
+          if (problematicTools.length > 0) {
+            logger.warn('Tools with potentially problematic names', problematicTools.map(t => t.name));
+          }
         }
       }
     }
