@@ -1,0 +1,17 @@
+# Ensure consistent line endings across platforms
+* text=auto
+
+# JavaScript files should always use LF
+*.js text eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+
+# Markdown files
+*.md text eol=lf
+
+# Configuration files
+.env* text eol=lf
+.gitignore text eol=lf
+
+# Ensure shell scripts use LF (if any)
+*.sh text eol=lf
